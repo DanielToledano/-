@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <title>משחק היירוטים🚀</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#000">
+  <link rel="manifest" href="./manifest.json">
+  <link rel="icon" type="image/png" href="./icon.png">
+
+
+  <style>
+    @keyframes pulse {
+      0% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.05); opacity: 0.8; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      touch-action: manipulation;
+    }
+    
+    body {
+      background: #f5f5f5;
+      font-family: sans-serif;
+      overflow: hidden;
+    }
+
+    /* מסך פתיחה + אנימציית Pulse + רקע bg.jpg */
+    #introScreen {
+      position: fixed;
+      top: 0; right: 0; bottom: 0; left: 0;
+      background-image: url('./assets/bg.jpg');
+      background-size: cover;
+      background-position: center;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      color: white;
+      text-shadow: 2px 2px 10px black;
+      animation: pulse 5s infinite;
+    }
+    
+    #introScreen input,
+    #introScreen button {
+      font-size: 1.2em;
+      padding: 10px 20px;
+      margin: 10px;
+      border-radius: 10px;
+      border: none;
+    }
+    
+    #introScreen button {
+      background-color: rgb(30, 144, 255);
+      color: white;
+      cursor: pointer;
+    }
+    
+    #introScreen button:hover {
+      background-color: rgb(0, 102, 204);
+    }
+
+    /* כפתור פאוז/רזיום */
+    #pauseBtn {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      z-index: 500;
+      font-size: 20px;
+      padding: 10px;
+      border-radius: 10px;
+      background-color: white;
+      cursor: pointer;
+      display: none;
+    }
+
+    /* מסך סיום */
+    #endScreen {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: rgba(0,0,0,0.8);
+      color: white;
+      display: none;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      z-index: 1000;
+    }
+
+    /* הצגת ניקוד */
+    #scoreElement {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: rgba(0,0,0,0.6);
+      color: white;
+      padding: 10px;
+      border-radius: 10px;
+      display: none;
+    }
+
+    /* כפתורים כללים */
+    .buttons {
+      display: inline-block;
+      padding: 10px 20px;
+      margin: 10px;
+      border-radius: 10px;
+      border: none;
+      font-size: 1em;
+      background: rgb(30, 144, 255);
+      color: white;
+      cursor: pointer;
+    }
+    
+    .buttons:hover {
+      background-color: rgb(0, 102, 204);
+    }
+
+    /* תפריט צדדי */
+    #gameButtons {
+      position: absolute;
+      top: 80px;
+      left: 10px;
+      display: none;
+    }
+
+    /* מיכל הטילים */
+    #container {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      top: 0; left: 0;
+      display: none;
+      background-image: url('./assets/bg.jpg');
+      background-size: cover;
+      background-position: center;
+    }
+
+    /* רצפה */
+    #floor {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 20px;
+      background: linear-gradient(to bottom, #222, #555);
+      display: none;
+    }
+
+    /* אנימציית נפילה לטילים */
+    @keyframes goDown {
+      0% { transform: translateY(0); }
+      100% { transform: translateY(1200px); }
+    }
+
+    /* המטוס והמיירט */
+    #plane {
+      position: absolute;
+      bottom: 10%;
+      right: 100px;
+      width: 150px;
+      display: none;
+    }
+    
+    #meyaret {
+      position: absolute;
+      bottom: 10%;
+      right: 210px;
+      width: 100px;
+      display: none;
+    }
+
+    /* אנימציית ירי */
+    .iyrutA {
+      animation: iyrut 0.5s forwards;
+    }
+    
+    @keyframes iyrut {
+      0% { right: 210px; }
+      100% { right: 100%; }
+    }
+
+    /* לוגו פרוגיקס */
+    #progiks {
+      position: absolute;
+      bottom: 30px;
+      left: 10px;
+      width: 40px;
+    }
+
+    /* פאוז */
+    .paused {
+      animation-play-state: paused !important;
+    }
+
+    /* קונפטי */
+    .confetti {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      width: 10px;
+      height: 10px;
+      background: red;
+      border-radius: 50%;
+      opacity: 0.8;
+      z-index: 2000;
+      animation: confMove 3s linear forwards;
+    }
+    
+    @keyframes confMove {
+      0% { transform: translate(-50%, -50%) rotate(0deg); }
+      100% { transform: translate(-50%, 300px) rotate(720deg); opacity: 0; }
+    }
+
+    /* כפתורי מובייל */
+    .mobile-controls {
+      position: fixed;
+      bottom: 20px;
+      left: 20px;
+      z-index: 1000;
+      display: none;
+    }
+
+    .mobile-btn {
+      width: 60px;
+      height: 60px;
+      background: rgba(255,255,255,0.8);
+      border-radius: 50%;
+      margin: 10px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 24px;
+      cursor: pointer;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+    }
+
+    @media (max-width: 768px) {
+      #plane { width: 100px !important; right: 20px !important; }
+      #meyaret { width: 70px !important; right: 100px !important; }
+      .mobile-controls { display: flex !important; }
+      #gameButtons { top: 120px !important; left: 5px !important; }
+    }
+  </style>
+</head>
+
+<body dir="rtl">
+  <!-- כפתורי מובייל -->
+  <div class="mobile-controls">
+    <div class="mobile-btn" id="upBtn">↑</div>
+    <div class="mobile-btn" id="downBtn">↓</div>
+    <div class="mobile-btn" id="shootBtn">💥</div>
+  </div>
+
+  <!-- מסך פתיחה -->
+  <div id="introScreen">
+    <h1 id="headline">⚔️ חרבות ברזל ⚔️</h1>
+    <p>יירט את הטיל במקש רווח ותטוס עם החצים</p>
+    <input type="text" placeholder="הכנס את שמך" id="userName">
+    <button onclick="saveUser()" id="save">יאללה בוא נתחיל!</button>
+  </div>
+
+  <!-- אזור המשחק -->
+  <div id="container"></div>
+
+  <!-- כפתור פאוז -->
+  <button id="pauseBtn" onclick="togglePause()">⏸️</button>
+
+  <!-- תפריט צדדי -->
+  <aside id="gameButtons">
+    <button id="startGameI" class="buttons" onclick="startGame()">התחל משחק 🚀</button>
+    <br><br>
+    <button id="saveLastScore" class="buttons" onclick="saveScore()">שמור תוצאה 💯</button>
+    <br><br>
+    <button id="deleteScore" class="buttons" onclick="newGame()">אפס תוצאה 🔁</button>
+    <br><br>
+    <button id="muteBtn" class="buttons" onclick="toggleMute()">השתק/החזר</button>
+  </aside>
+
+  <!-- מטוס ומיירט -->
+  <img src="./assets/plane.png" id="plane" alt="מטוס">
+  <img src="./assets/meyaret.png" id="meyaret" alt="כיפת ברזל">
+
+  <!-- רצפה -->
+  <div id="floor"></div>
+
+  <!-- מסך סיום -->
+  <div id="endScreen">
+    <h2 id="endMessage"></h2>
+    <button onclick="restartGame()" class="buttons">ריסטארט</button>
+    <button onclick="resetUser()" class="buttons">משתמש חדש</button>
+  </div>
+
+  <!-- ניקוד -->
+  <h2 id="scoreElement">הניקוד שלך: <span id="scoreId">0</span></h2>
+
+  <!-- פרוגיקס -->
+  <aside>
+    <img src="./assets/progiks.jpg" id="progiks" alt="progiks">
+  </aside>
+        
+  <script>
+    // רישום Service Worker
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js')
+          .then(reg => console.log('Service Worker registered'))
+          .catch(err => console.log('Service Worker registration failed:', err));
+      });
+    }
+
+    // כפתורי מובייל
+    const upBtn = document.getElementById('upBtn');
+    const downBtn = document.getElementById('downBtn');
+    const shootBtn = document.getElementById('shootBtn');
+
+    upBtn.addEventListener('touchstart', () => movePlane('up'));
+    downBtn.addEventListener('touchstart', () => movePlane('down'));
+    shootBtn.addEventListener('click', shoot);
+
+    function movePlane(direction) {
+      const plane = document.getElementById("plane");
+      const meyaret = document.getElementById("meyaret");
+      let currentBottom = parseInt(window.getComputedStyle(plane).bottom);
+      plane.style.bottom = direction === 'up' ? (currentBottom + 30) + "px" : (currentBottom - 30) + "px";
+      meyaret.style.bottom = plane.style.bottom;
+    }
+    let currentUser = null;
+    let score = 0;
+    let isPaused = false;
+    let gameStarted = false;
+    let isMuted = false;  // כפתור השתקה
+    let intervalIds = [];
+    const elementsArray = [];
+
+    // סאונדים - נתיב יחסי ב-./assets
+    let bgSound = new Audio("./assets/bgSong.mp3");
+    let boomSound = new Audio("./assets/boom.mp3");
+
+    // עם טעינת הדף
+    window.onload = () => {
+      const savedUser = localStorage.getItem("currentUser");
+      if (savedUser) {
+        currentUser = savedUser;
+        showGameUI();
+      }
+    };
+
+    function saveUser() {
+      const nameInput = document.getElementById("userName");
+      const introScreen = document.getElementById("introScreen");
+
+      const enteredName = nameInput.value.trim();
+      if (!enteredName) {
+        alert("נא להזין שם");
+        return;
+      }
+
+      currentUser = enteredName;
+      localStorage.setItem("currentUser", currentUser);
+
+      introScreen.style.display = "none";
+      showGameUI();
+    }
+
+    function showGameUI() {
+      document.getElementById("gameButtons").style.display = "block";
+      document.getElementById("pauseBtn").style.display = "block";
+      document.getElementById("container").style.display = "block";
+      document.getElementById("floor").style.display = "block";
+      document.getElementById("scoreElement").style.display = "block";
+
+      const plane = document.getElementById("plane");
+      const meyaret = document.getElementById("meyaret");
+      plane.style.display = "block";
+      meyaret.style.display = "block";
+    }
+
+    // התחל משחק – השיר מתחיל רק כאן!
+    function startGame() {
+      if (!currentUser) {
+        alert("אין משתמש, תחילה תשמור שם.");
+        return;
+      }
+      if (gameStarted) return;
+
+      gameStarted = true;
+      isPaused = false;
+
+      bgSound.loop = true;
+      if (!isMuted) {
+        bgSound.currentTime = 0;
+        bgSound.play();
+      }
+
+      intervalIds.push(setInterval(attack, 4200));
+      intervalIds.push(setInterval(checkCollision, 16));
+      intervalIds.push(setInterval(checkFall, 100));
+    }
+
+    function attack() {
+      if (isPaused) return;
+      const container = document.getElementById("container");
+
+      let rocket = document.createElement("img");
+      rocket.src = "./assets/enemy.png";
+      rocket.style.width = "60px";
+      rocket.style.height = "200px";
+      rocket.style.position = "absolute";
+      rocket.style.left = `${Math.floor(Math.random() * 55)}%`;
+      rocket.style.top = `-100px`;
+      rocket.style.animation = "goDown 4.2s linear forwards";
+      rocket.classList.add("enemys");
+
+      container.appendChild(rocket);
+      elementsArray.push(rocket);
+    }
+
+    function checkCollision() {
+      if (isPaused) return;
+      const meyaret = document.getElementById("meyaret");
+
+      elementsArray.forEach((enemy, i) => {
+        if (isColliding(meyaret, enemy)) {
+          if (!isMuted) boomSound.play();
+          score++;
+          document.getElementById("scoreId").innerText = score;
+
+          enemy.remove();
+          elementsArray.splice(i, 1);
+        }
+      });
+    }
+
+    function checkFall() {
+      if (isPaused) return;
+      const floorRect = document.getElementById("floor").getBoundingClientRect();
+
+      for (let i = 0; i < elementsArray.length; i++) {
+        const enemy = elementsArray[i];
+        const rect = enemy.getBoundingClientRect();
+        if (rect.bottom >= floorRect.top) {
+          enemy.remove();
+          elementsArray.splice(i, 1);
+          endGame();
+          break;
+        }
+      }
+    }
+
+    function isColliding(el1, el2) {
+      const r1 = el1.getBoundingClientRect();
+      const r2 = el2.getBoundingClientRect();
+      return !(
+        r1.right < r2.left ||
+        r1.left > r2.right ||
+        r1.bottom < r2.top ||
+        r1.top > r2.bottom
+      );
+    }
+
+    function endGame() {
+      if (!isMuted) bgSound.pause();
+      if (!isMuted) boomSound.play();
+      clearAllIntervals();
+
+      // קונפטי רק אם צברת 10 נקודות +
+      if (score >= 10) {
+        fireConfetti();
+      }
+      const endScreen = document.getElementById("endScreen");
+      document.getElementById("endMessage").innerText = `המשחק נגמר ${currentUser}, הניקוד שלך: ${score}`;
+      endScreen.style.display = "flex";
+    }
+
+    function clearAllIntervals() {
+      intervalIds.forEach(clearInterval);
+      intervalIds = [];
+      gameStarted = false;
+    }
+
+    function restartGame() {
+      document.getElementById("endScreen").style.display = "none";
+      score = 0;
+      document.getElementById("scoreId").innerText = score;
+      elementsArray.forEach(e => e.remove());
+      elementsArray.length = 0;
+      showGameUI();
+    }
+
+    function resetUser() {
+      localStorage.removeItem("currentUser");
+      window.location.reload();
+    }
+
+    function saveScore() {
+      if (!currentUser) {
+        alert("אין משתמש! קודם תכניס שם.");
+        return;
+      }
+      localStorage.setItem("score_" + currentUser, score);
+      alert("התוצאה נשמרה בהצלחה!");
+    }
+
+    function newGame() {
+      if (!currentUser) return;
+      const oldScore = localStorage.getItem("score_" + currentUser);
+      alert(`תוצאה אופסה. התוצאה הקודמת של ${currentUser} היתה ${oldScore}`);
+      localStorage.setItem("score_" + currentUser, 0);
+      score = 0;
+      document.getElementById("scoreId").innerText = score;
+    }
+
+    function togglePause() {
+      isPaused = !isPaused;
+      const pauseBtn = document.getElementById("pauseBtn");
+      if (isPaused) {
+        if (!isMuted) bgSound.pause();
+        pauseBtn.innerText = "▶️";
+        elementsArray.forEach(rocket => {
+          rocket.classList.add("paused");
+        });
+        intervalIds.forEach(clearInterval);
+      } else {
+        if (!isMuted) bgSound.play();
+        pauseBtn.innerText = "⏸️";
+        elementsArray.forEach(rocket => {
+          rocket.classList.remove("paused");
+        });
+        intervalIds = [];
+        intervalIds.push(setInterval(attack, 4200));
+        intervalIds.push(setInterval(checkCollision, 16));
+        intervalIds.push(setInterval(checkFall, 100));
+      }
+    }
+
+    function toggleMute() {
+      isMuted = !isMuted;
+      bgSound.muted = isMuted;
+      boomSound.muted = isMuted;
+      alert(isMuted ? 'הסאונד הושתק!' : 'הסאונד הופעל!');
+    }
+
+    window.addEventListener("keydown", (e) => {
+      const plane = document.getElementById("plane");
+      const meyaret = document.getElementById("meyaret");
+      if (e.code === "ArrowUp") {
+        let currentBottom = parseInt(window.getComputedStyle(plane).bottom);
+        plane.style.bottom = (currentBottom + 30) + "px";
+        meyaret.style.bottom = plane.style.bottom;
+      } else if (e.code === "ArrowDown") {
+        let currentBottom = parseInt(window.getComputedStyle(plane).bottom);
+        plane.style.bottom = (currentBottom - 30) + "px";
+        meyaret.style.bottom = plane.style.bottom;
+      } else if (e.code === "Space") {
+        shoot();
+      }
+    });
+
+    function shoot() {
+      const meyaret = document.getElementById("meyaret");
+      if (meyaret.classList.contains("iyrutA")) return;
+      meyaret.classList.add("iyrutA");
+      setTimeout(() => meyaret.classList.remove("iyrutA"), 500);
+    }
+
+    function fireConfetti() {
+      for (let i = 0; i < 30; i++) {
+        const c = document.createElement("div");
+        c.classList.add("confetti");
+        c.style.backgroundColor = randomColor();
+        c.style.left = (50 + (Math.random() * 20 - 10)) + "%";
+        c.style.top = (50 + (Math.random() * 20 - 10)) + "%";
+        document.body.appendChild(c);
+        setTimeout(() => c.remove(), 3000);
+      }
+    }
+
+    function randomColor() {
+      const r = Math.floor(Math.random() * 255);
+      const g = Math.floor(Math.random() * 255);
+      const b = Math.floor(Math.random() * 255);
+      return `rgb(${r}, ${g}, ${b})`;
+    }
+  </script>
+</body>
+</html>
