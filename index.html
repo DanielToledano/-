@@ -433,8 +433,9 @@
 
       let rocket = document.createElement("img");
       rocket.src = "./assets/enemy.png";
-      rocket.style.width = "60px";
-      rocket.style.height = "200px";
+      let rocketSize = Math.floor(Math.random() * (120 - 50 + 1)) + 50; // בין 50 ל-120px
+      rocket.style.width = `${rocketSize}px`;
+      rocket.style.height = `${rocketSize * 3}px`; // התאמת הגובה לרוחב
       rocket.style.position = "absolute";
       rocket.style.left = `${Math.floor(Math.random() * 55)}%`;
       rocket.style.top = `-100px`;
