@@ -23,11 +23,36 @@
       touch-action: manipulation;
     }
     
-    body {
-      background: #f5f5f5;
-      font-family: sans-serif;
-      overflow: hidden;
-    }
+  body {
+  transform: rotate(0deg);
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  overscroll-behavior: contain; /* מונע גלילה לא רצויה */
+  touch-action: manipulation; /* מבטל נגיעות לא רצויות */
+}
+
+/* למובייל – הפוך את המסך לרוחב */
+@media (orientation: portrait) {
+  body {
+    transform: rotate(90deg);
+    transform-origin: center;
+    width: 100vh;
+    height: 100vw;
+    overflow: hidden;
+    position: absolute;
+    top: 0;
+    left: 0;
+  }
+
+  #container {
+    width: 100vh;
+    height: 100vw;
+    transform: rotate(-90deg);
+    transform-origin: center;
+  }
+}
+
 
     /* מסך פתיחה + אנימציית Pulse + רקע bg.jpg */
     #introScreen {
@@ -221,7 +246,7 @@
     .mobile-controls {
       position: fixed;
       bottom: 20px;
-      left: 20px;
+      left: 50vw;
       z-index: 1000;
       display: none;
     }
@@ -239,6 +264,17 @@
       cursor: pointer;
       box-shadow: 0 2px 5px rgba(0,0,0,0.3);
     }
+    /* מניעת סימון טקסט ולחיצות כפולות */
+.mobile-btn, .buttons {
+  user-select: none; /* אין סימון טקסט */
+  -webkit-user-select: none; /* לספארי */
+  -moz-user-select: none; /* לפיירפוקס */
+  -ms-user-select: none; /* לאינטרנט אקספלורר */
+  -webkit-tap-highlight-color: transparent; /* אין highlight בכפתורים */
+  touch-action: manipulation; /* מניעת swipe/zoom במובייל */
+  outline: none; /* ביטול מסגרת אחרי לחיצה */
+}
+
 
     @media (max-width: 768px) {
       #plane { width: 100px !important; right: 20px !important; }
@@ -254,7 +290,7 @@
   <div class="mobile-controls">
     <div class="mobile-btn" id="upBtn">↑</div>
     <div class="mobile-btn" id="downBtn">↓</div>
-    <div class="mobile-btn" id="shootBtn">💥</div>
+    <div class="mobile-btn" id="shootBtn">🚀</div>
   </div>
 
   <!-- מסך פתיחה -->
@@ -319,9 +355,9 @@
     const downBtn = document.getElementById('downBtn');
     const shootBtn = document.getElementById('shootBtn');
 
-    upBtn.addEventListener('touchstart', () => movePlane('up'));
-    downBtn.addEventListener('touchstart', () => movePlane('down'));
-    shootBtn.addEventListener('click', shoot);
+    upBtn.addEventListener('pointerdown', () => movePlane('up'));
+    downBtn.addEventListener('pointerdown', () => movePlane('down'));
+    shootBtn.addEventListener('pointerdown', shoot);
 
     function movePlane(direction) {
       const plane = document.getElementById("plane");
@@ -568,7 +604,7 @@
       meyaret.classList.add("iyrutA");
       setTimeout(() => meyaret.classList.remove("iyrutA"), 500);
     }
-
+    console.log(shootBtn)
     function fireConfetti() {
       for (let i = 0; i < 30; i++) {
         const c = document.createElement("div");
