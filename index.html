@@ -1,5 +1,5 @@
 
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="he" dir="rtl">
 <head>
   <meta charset="UTF-8">
@@ -54,8 +54,6 @@
     height: 100vw;
     transform: rotate(-90deg);
     transform-origin: center;
-    background-size: cover;
-   background-position: center;
   }
 }
 
@@ -206,15 +204,14 @@
       display: none;
     }
 
-    /* אנימציית ירי */
     .iyrutA {
-      animation: iyrut 0.5s forwards;
-    }
-    
-    @keyframes iyrut {
-      0% { right: 210px; }
-      100% { right: 100%; }
-    }
+  animation: iyrut 0.5s forwards;
+}
+
+@keyframes iyrut {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(100vw); }
+}
 
     /* לוגו פרוגיקס */
     #progiks {
@@ -255,6 +252,7 @@
       left: 50vw;
       z-index: 1000;
       display: none;
+      z-index: 9999;
     }
 
     .mobile-btn {
@@ -364,7 +362,7 @@
     upBtn.addEventListener('pointerdown', () => movePlane('up'));
     downBtn.addEventListener('pointerdown', () => movePlane('down'));
     shootBtn.addEventListener('pointerdown', shoot);
-
+    shootBtn.addEventListener('touchstart', shoot);
     function movePlane(direction) {
       const plane = document.getElementById("plane");
       const meyaret = document.getElementById("meyaret");
@@ -392,6 +390,21 @@
         showGameUI();
       }
     };
+    window.addEventListener("orientationchange", () => {
+  if (window.orientation === 0 || window.orientation === 180) {
+    // Portrait mode
+    document.body.style.width = "100vw";
+    document.body.style.height = "100vh";
+    document.getElementById("container").style.backgroundSize = "cover";
+    console.log("Portrait mode detected!");
+  } else {
+    // Landscape mode
+    document.body.style.width = "100vw";
+    document.body.style.height = "100vh";
+    document.getElementById("container").style.backgroundSize = "cover";
+    console.log("Landscape mode detected!");
+  }
+});
 
     function saveUser() {
       const nameInput = document.getElementById("userName");
