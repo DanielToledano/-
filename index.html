@@ -35,29 +35,7 @@
   touch-action: manipulation; /* מבטל נגיעות לא רצויות */
 }
 
-/* למובייל – הפוך את המסך לרוחב */
-@media (orientation: portrait) {
-  body {
-    transform: rotate(90deg);
-    transform-origin: center;
-    width: 100vh;
-    height: 100vw;
-    overflow: hidden;
-    position: absolute;
-    top: 0;
-    left: 0;
-    background-size: cover;
-    background-repeat: no-repeat;
-    background-position: center;
-  }
 
-  #container {
-    width: 100vh;
-    height: 100vw;
-    transform: rotate(-90deg);
-    transform-origin: center;
-  }
-}
 
 
     /* מסך פתיחה + אנימציית Pulse + רקע bg.jpg */
@@ -395,21 +373,7 @@
         showGameUI();
       }
     };
-    window.addEventListener("orientationchange", () => {
-  if (window.orientation === 0 || window.orientation === 180) {
-    // Portrait mode
-    document.body.style.width = "100vw";
-    document.body.style.height = "100vh";
-    document.getElementById("container").style.backgroundSize = "cover";
-    console.log("Portrait mode detected!");
-  } else {
-    // Landscape mode
-    document.body.style.width = "100vw";
-    document.body.style.height = "100vh";
-    document.getElementById("container").style.backgroundSize = "cover";
-    console.log("Landscape mode detected!");
-  }
-});
+  
 
     function saveUser() {
       const nameInput = document.getElementById("userName");
